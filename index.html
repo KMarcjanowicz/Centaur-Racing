@@ -1,999 +1,1006 @@
-<head>
-    <script>
-        document.addEventListener("DOMContentLoaded", function (event) {
-            var canvas = document.getElementById('canvas');
-            var x = canvas.getContext('2d');
-            var root = document.getElementById("root")
-            var player_count = 0;
-            var crashed = 0;
-            var victory = false;
-            var ready = false;
-            var keys = ["none", "none", "none", "none"]
-            var keys2 = ["none", "none", "none", "none"]
-            var colors = ["black", "orange", "pink", "white"];
-            
-            var laps = 20;
-            var val = undefined;
-            var val2 = undefined;
-            var players = []
-            var game = false;
-            var status = document.getElementById("status_div")
-            var positions = [];
-            var img = new Image();
-            img.src = "img/miscs/grass.png";
-            var img2 = new Image();
-            img2.src = "img/miscs/dirt.png";
-            choose_key = function (e) {
-                val = e.value;
-                let press_key = document.createElement("div")
-                press_key.className = "overlay2";
-                document.body.appendChild(press_key)
-                press_key.innerHTML = "<p class='inform'>Naciśnij dowolny klawisz!</p>"
-                document.body.addEventListener("keydown", function (e) {
-                    keys[val] = e.key
-                    choose_keys.innerHTML = "<h1>Wybierz przyciski dla graczy: </h1>";
-                    for (var i = 0; i < player_count; i++) {
-                        choose_keys.innerHTML +=
-                            '<label> <h2 style="color: ' + colors[i] + '">Player ' + (i + 1) + '<h2> <h3>Turn key: </h3> <h4> ' + keys[i] + ' </h4> <button onclick="choose_key(this)" class="change" value="' + i + '"> Change </button><h3>Boost key: </h3> <h4> ' + keys2[i] + ' </h4> <button onclick="choose_key2(this)" class="change" value="' + i + '"> Change </button></lavel>'
-                    }
-                    choose_keys.innerHTML += "<div id='ready' onclick='race_ready(this)'>READY!</div>"
-                    press_key.remove();
-                })
-                document.body.addEventListener("keyup", function (e) {
-                    val = undefined;
-                })
+    <head>
+        <script>
+            document.addEventListener("DOMContentLoaded", function (event) {
+                var canvas = document.getElementById('canvas');
+                var x = canvas.getContext('2d');
+                var root = document.getElementById("root")
+                var player_count = 0;
+                var crashed = 0;
+                var victory = false;
+                var ready = false;
+                var keys = ["none", "none", "none", "none"]
+                var keys2 = ["none", "none", "none", "none"]
+                var colors = ["black", "orange", "pink", "white"];
+                
+                var laps = 20;
+                var val = undefined;
+                var val2 = undefined;
+                var players = []
+                var game = false;
+                var status = document.getElementById("status_div")
+                var positions = [];
 
-            }
-            choose_key2 = function (e) {
-                val2 = e.value;
-                let press_key = document.createElement("div")
-                press_key.className = "overlay2";
-                document.body.appendChild(press_key)
-                press_key.innerHTML = "<p class='inform'>Naciśnij dowolny klawisz!</p>"
-                document.body.addEventListener("keydown", function (e) {
-                    keys2[val2] = e.key
-                    choose_keys.innerHTML = "<h1>Wybierz przyciski dla graczy: </h1>";
-                    for (var i = 0; i < player_count; i++) {
-                        choose_keys.innerHTML +=
-                            '<label> <h2 style="color: ' + colors[i] + '">Player ' + (i + 1) + '<h2> <h3>Turn key: </h3> <h4> ' + keys[i] + ' </h4> <button onclick="choose_key(this)" class="change" value="' + i + '"> Change </button><h3>Boost key: </h3> <h4> ' + keys2[i] + ' </h4> <button onclick="choose_key2(this)" class="change" value="' + i + '"> Change </button></lavel>'
-                    }
-                    choose_keys.innerHTML += "<div id='ready' onclick='race_ready(this)'>READY!</div>"
-                    press_key.remove();
-                })
-                document.body.addEventListener("keyup", function (e) {
-                    val2 = undefined;
-                })
+                var img = new Image();
+                img.src = "img/miscs/grass.png";
 
-            }
-            race_ready = function (e) {
-                var overlay = document.getElementById("overlay")
-                ready = true;
-                if (ready) {
-                    overlay.style.display = "none";
-                    {
+                var img2 = new Image();
+                img2.src = "img/miscs/dirt.png";
+
+                choose_key = function (e) {
+                    val = e.value;
+                    let press_key = document.createElement("div")
+                    press_key.className = "overlay2";
+                    document.body.appendChild(press_key)
+                    press_key.innerHTML = "<p class='inform'>Naciśnij dowolny klawisz!</p>"
+                    document.body.addEventListener("keydown", function (e) {
+                        keys[val] = e.key
+                        choose_keys.innerHTML = "<h1>Wybierz przyciski dla graczy: </h1>";
                         for (var i = 0; i < player_count; i++) {
-                            players[i] = new player((i + 1), keys[i], keys2[i], 800, 600 + 40 * (i + 1), colors[i]);
+                            choose_keys.innerHTML +=
+                                '<label> <h2 style="color: ' + colors[i] + '">Player ' + (i + 1) + '<h2> <h3>Turn key: </h3> <h4> ' + keys[i] + ' </h4> <button onclick="choose_key(this)" class="change" value="' + i + '"> Change </button><h3>Boost key: </h3> <h4> ' + keys2[i] + ' </h4> <button onclick="choose_key2(this)" class="change" value="' + i + '"> Change </button></lavel>'
                         }
-                        game = true;
-                        race();
-                    }
-                }
-            }
-            function end_race(x, y, z) {
-                var win_div = document.createElement("div");
-                win_div.className = "win_div";
+                        choose_keys.innerHTML += "<div id='ready' onclick='race_ready(this)'>READY!</div>"
+                        press_key.remove();
+                    })
+                    document.body.addEventListener("keyup", function (e) {
+                        val = undefined;
+                    })
 
-                if (player_count < 2) {
-                    if (players[x].lap >= 20) {
-                        console.log("WIN!");
-                    }
                 }
-                else {
-                    var winner;
-                    if (victory == false) {
-                        if (players[x].lap >= 20) {
-                            winner = players[x].color;
-                            victory = true;
+                choose_key2 = function (e) {
+                    val2 = e.value;
+                    let press_key = document.createElement("div")
+                    press_key.className = "overlay2";
+                    document.body.appendChild(press_key)
+                    press_key.innerHTML = "<p class='inform'>Naciśnij dowolny klawisz!</p>"
+                    document.body.addEventListener("keydown", function (e) {
+                        keys2[val2] = e.key
+                        choose_keys.innerHTML = "<h1>Wybierz przyciski dla graczy: </h1>";
+                        for (var i = 0; i < player_count; i++) {
+                            choose_keys.innerHTML +=
+                                '<label> <h2 style="color: ' + colors[i] + '">Player ' + (i + 1) + '<h2> <h3>Turn key: </h3> <h4> ' + keys[i] + ' </h4> <button onclick="choose_key(this)" class="change" value="' + i + '"> Change </button><h3>Boost key: </h3> <h4> ' + keys2[i] + ' </h4> <button onclick="choose_key2(this)" class="change" value="' + i + '"> Change </button></lavel>'
                         }
-                        else if ((crashed + 1) >= player_count) {
-                            for (let i = 0; i < player_count; i++) {
-                                if (players[i].crash == false) {
-                                    winner = players[i].color;
-                                }
+                        choose_keys.innerHTML += "<div id='ready' onclick='race_ready(this)'>READY!</div>"
+                        press_key.remove();
+                    })
+                    document.body.addEventListener("keyup", function (e) {
+                        val2 = undefined;
+                    })
+
+                }
+                race_ready = function (e) {
+                    var overlay = document.getElementById("overlay")
+                    ready = true;
+                    if (ready) {
+                        overlay.style.display = "none";
+                        {
+                            for (var i = 0; i < player_count; i++) {
+                                players[i] = new player((i + 1), keys[i], keys2[i], 800, 600 + 40 * (i + 1), colors[i]);
                             }
-                            victory = true;
+                            game = true;
+                            race();
                         }
                     }
-                    if (winner == colors[0]) {
-                        clearInterval(y);
-                        clearInterval(z);
-                        console.log("PLAYER 1 WIN!");
-                        win_div.innerHTML = 
-                        '<h2 style="color: ' + colors[0] + '">Winner, winner, chicken dinner! Player 1<h2>';
-                        root.appendChild(win_div);
+                }
+                function end_race(x, y, z) {
+                    var win_div = document.createElement("div");
+                    win_div.className = "win_div";
 
-                    }
-                    else if (winner == colors[1]) {
-                        clearInterval(y);
-                        clearInterval(z);
-                        console.log("PLAYER 2 WIN!");
-                        win_div.innerHTML = 
-                        '<h2 style="color: ' + colors[1] + '">Winner, winner, chicken dinner! Player 2<h2>';
-                        root.appendChild(win_div);
-                    }
-                    else if (winner == colors[2]) {
-                        clearInterval(y);
-                        clearInterval(z);
-                        console.log("PLAYER 3 WIN!");
-                        win_div.innerHTML = 
-                        '<h2 style="color: ' + colors[2] + '">Winner, winner, chicken dinner! Player 3<h2>';
-                        root.appendChild(win_div);
-                    }
-                    else if (winner == colors[3]) {
-                        clearInterval(y);
-                        clearInterval(z);
-                        console.log("PLAYER 4 WIN!");
-                        win_div.innerHTML = 
-                        '<h2 style="color: ' + colors[3] + '">Winner, winner, chicken dinner! Player 3<h2>';
-                        root.appendChild(win_div);
-                    }
-                }
-            }
-            function which_keys() {
-                var choose_keys = document.getElementById("choose_keys")
-                choose_keys.style.display = "block"
-                for (var i = 0; i < player_count; i++) {
-                    choose_keys.innerHTML +=
-                        '<label> <h2 style="color: ' + colors[i] + '">Player ' + (i + 1) + '<h2> <h3>Turn key: </h3> <h4> ' + keys[i] + ' </h4> <button onclick="choose_key(this)" class="change" value="' + i + '"> Change </button><h3>Boost key: </h3> <h4> ' + keys2[i] + ' </h4> <button onclick="choose_key2(this)" class="change" value="' + i + '"> Change </button></lavel>'
-                }
-                choose_keys.innerHTML += "<div id='ready' onclick='race_ready(this)'>READY!</div>"
-                document.body.addEventListener("keydown", function (e) {
-                })
-            }
-            function status_update() {
-                status.innerHTML = "";
-                if (player_count == 1) {
-                    var display_player = document.createElement("div");
-                    display_player.className = "stat";
-                    display_player.innerHTML =
-                        "<p style='color: " + colors[0] + ";'> Player 1</p>" +
-                        "<p style='color: white;'>Laps: " + players[0].lap + " / 20 </p>"
-                    if (players[0].crash == false) {
-                        display_player.innerHTML +=
-                            "<p style='color: limegreen;'>PLAYING</p>"
+                    if (player_count < 2) {
+                        if (players[x].lap >= 20) {
+                            console.log("WIN!");
+                        }
                     }
                     else {
-                        display_player.innerHTML +=
-                            "<p style='color: red;'>CRASHED</p>"
-                    }
-                    status.appendChild(display_player)
-                }
-                else if (player_count == 2) {
-                    let player_1, player_2;
-                    let display_players = [];
-                    if (players[0].color == "grey") {
-                        player_1 = players[0];
-                        player_2 = players[1];
-                        display_players.push(player_1);
-                        display_players.push(player_2);
-                    }
-                    else {
-                        player_1 = players[1];
-                        player_2 = players[0];
-                        display_players.push(player_1);
-                        display_players.push(player_2);
-                    }
-                    // console.log("PLAYERS[0]: " + players[0].color)
-                    // console.log("PLAYERS[1]: " + players[1].color)
-                    // console.log("Player_1 : " + player_1.color)
-                    // console.log("Player_2 : " + player_2.color)
-                    //console.log(display_players);
-
-                    for (var i = 0; i < 2; i++) {
-                        var display_player = document.createElement("div");
-                        display_player.className = "stat";
-                        display_player.innerHTML =
-                            "<p style='color: " + colors[i] + ";'> Player " + (i + 1) + "</p>" +
-                            "<p style='color: white;'>Laps: " + display_players[i].lap + " / 20 </p>"
-                        if (display_players[i].crash == false) {
-                            display_player.innerHTML +=
-                                "<p style='color: limegreen;'>PLAYING</p>"
-                        }
-                        else {
-                            display_player.innerHTML +=
-                                "<p style='color: red;'>CRASHED</p>"
-                        }
-                        status.appendChild(display_player)
-                    }
-                }
-                else if (player_count == 3) {
-                    let player_1, player_2, player_3;
-                    let display_players = [];
-
-                    if (players[0].color == "black") {
-                        player_1 = players[0];
-                    }
-                    else if (players[1].color == "black") {
-                        player_1 = players[1];
-                    }
-                    else if (players[2].color == "black") {
-                        player_1 = players[2];
-                    }
-                    if (players[0].color == "orange") {
-                        player_2 = players[0];
-                    }
-                    else if (players[1].color == "orange") {
-                        player_2 = players[1];
-                    }
-                    else if (players[2].color == "orange") {
-                        player_2 = players[2];
-                    }
-                    if (players[0].color == "pink") {
-                        player_3 = players[0];
-                    }
-                    else if (players[1].color == "pink") {
-                        player_3 = players[1];
-                    }
-                    else if (players[2].color == "pink") {
-                        player_3 = players[2];
-                    }
-                    display_players.push(player_1);
-                    display_players.push(player_2);
-                    display_players.push(player_3);
-
-
-                    for (var i = 0; i < 3; i++) {
-                        var display_player = document.createElement("div");
-                        display_player.className = "stat";
-                        display_player.innerHTML =
-                            "<p style='color: " + colors[i] + ";'> Player " + (i + 1) + "</p>" +
-                            "<p style='color: white;'>Laps: " + display_players[i].lap + " / 20 </p>"
-                        if (display_players[i].crash == false) {
-                            display_player.innerHTML +=
-                                "<p style='color: limegreen;'>PLAYING</p>"
-                        }
-                        else {
-                            display_player.innerHTML +=
-                                "<p style='color: red;'>CRASHED</p>"
-                        }
-                        status.appendChild(display_player)
-                    }
-                }
-                else if (player_count == 4) {
-                    let player_1, player_2, player_3, player_4;
-                    let display_players = [];
-
-                    if (players[0].color == "grey") {
-                        player_1 = players[0];
-                    }
-                    else if (players[1].color == "grey") {
-                        player_1 = players[1];
-                    }
-                    else if (players[2].color == "grey") {
-                        player_1 = players[2];
-                    }
-                    else if (players[3].color == "grey") {
-                        player_1 = players[3];
-                    }
-
-                    if (players[0].color == "orange") {
-                        player_2 = players[0];
-                    }
-                    else if (players[1].color == "orange") {
-                        player_2 = players[1];
-                    }
-                    else if (players[2].color == "orange") {
-                        player_2 = players[2];
-                    }
-                    else if (players[3].color == "orange") {
-                        player_2 = players[3];
-                    }
-
-                    if (players[0].color == "pink") {
-                        player_3 = players[0];
-                    }
-                    else if (players[1].color == "pink") {
-                        player_3 = players[1];
-                    }
-                    else if (players[2].color == "pink") {
-                        player_3 = players[2];
-                    }
-                    else if (players[3].color == "pink") {
-                        player_3 = players[3];
-                    }
-
-                    if (players[0].color == "white") {
-                        player_4 = players[0];
-                    }
-                    else if (players[1].color == "white") {
-                        player_4 = players[1];
-                    }
-                    else if (players[2].color == "white") {
-                        player_4 = players[2];
-                    }
-                    else if (players[3].color == "white") {
-                        player_4 = players[3];
-                    }
-
-                    display_players.push(player_1);
-                    display_players.push(player_2);
-                    display_players.push(player_3);
-                    display_players.push(player_4);
-
-
-                    for (var i = 0; i < 4; i++) {
-                        var display_player = document.createElement("div");
-                        display_player.className = "stat";
-                        display_player.innerHTML =
-                            "<p style='color: " + colors[i] + ";'> Player " + (i + 1) + "</p>" +
-                            "<p style='color: white;'>Laps: " + display_players[i].lap + " / 20 </p>"
-                        if (display_players[i].crash == false) {
-                            display_player.innerHTML +=
-                                "<p style='color: limegreen;'>PLAYING</p>"
-                        }
-                        else {
-                            display_player.innerHTML +=
-                                "<p style='color: red;'>CRASHED</p>"
-                        }
-                        status.appendChild(display_player)
-                    }
-                }
-
-            }
-            function layout_creation() {
-                x.beginPath();
-                var pattern = x.createPattern(img, 'repeat');
-                x.fillStyle = pattern;
-                x.fillRect(0, 0, 1600, 800);
-                //1 zakręt-----------------------------------------------------------------------
-                x.beginPath();
-                pattern = x.createPattern(img2, 'repeat');
-                x.arc(400, 400, 400, 1 / 2 * Math.PI, 3 / 2 * Math.PI, false);
-                x.fillStyle = pattern;
-                x.fill();
-                x.lineWidth = 2;
-                x.strokeStyle = '#000000';
-                x.stroke();
-                //2 zakret------------------------------------------------------------------
-                x.beginPath();
-                pattern = x.createPattern(img2, 'repeat');
-                x.arc(1200, 400, 400, 3 / 2 * Math.PI, 1 / 2 * Math.PI, false);
-                x.fillStyle = pattern;
-                x.fill();
-                x.lineWidth = 2;
-                x.strokeStyle = '#000000';
-                x.stroke();
-                //pole
-                x.beginPath();
-                pattern = x.createPattern(img2, 'repeat');
-                x.fillStyle = pattern;
-                x.fillRect(400, 0, 800, 800);
-                //bandy przy polu
-                x.beginPath();
-                x.moveTo(400, 0)
-                x.lineTo(1200, 0)
-                x.lineWidth = 2;
-                x.stroke();
-                x.beginPath();
-                x.moveTo(400, 800)
-                x.lineTo(1200, 800)
-                x.lineWidth = 2;
-                x.stroke();
-                //wysepka w srodku
-                x.beginPath();
-                pattern = x.createPattern(img, 'repeat');
-                x.arc(500, 400, 200, 1 / 2 * Math.PI, 3 / 2 * Math.PI, false);
-                x.fillStyle = pattern;
-                x.fill();
-                x.lineWidth = 2;
-                x.strokeStyle = '#000000';
-                x.stroke();
-                pattern = x.createPattern(img, 'repeat');
-                x.arc(1100, 400, 200, 3 / 2 * Math.PI, 1 / 2 * Math.PI, false);
-                x.fillStyle = pattern;
-                x.fill();
-                x.lineWidth = 2;
-                x.strokeStyle = '#000000';
-                x.stroke();
-                //bandy przy wysepce
-                x.beginPath();
-                x.moveTo(500, 600)
-                x.lineTo(1100, 600)
-                x.lineWidth = 2;
-                x.stroke();
-                //start
-                x.beginPath();
-                x.fillStyle = "red";
-                x.fillRect(850, 601, 10, 198);
-            }
-
-            function how_many_players() {
-                var how_many = document.getElementsByTagName("button");
-                for (var i = 0; i < how_many.length; i++) {
-                    how_many[i].onclick = function () {
-                        player_count = this.value;
-                        var remove = document.getElementById("player_count");
-                        remove.style.display = "none"
-                        which_keys();
-                    }
-                }
-            }
-            img2.onload = function () {
-                img.onload = function () {
-                    layout_creation();
-                    how_many_players();
-                }
-            }
-            function check_collisions(x, y) {
-                var posX = x;
-                var posY = y;
-                if ((posX - 500) * (posX - 500) + (posY - 400) * (posY - 400) < 200 * 200) {
-                    return true;
-                }
-                else if ((posX - 1100) * (posX - 1100) + (posY - 400) * (posY - 400) < 200 * 200) {
-                    return true;
-                }
-                else if (500 < posX && posX < 1100 && 200 < posY && posY < 600) {
-                    return true;
-                }
-                else if ((posX - 400) * (posX - 400) + (posY - 400) * (posY - 400) > 400 * 400 && posX < 400) {
-                    return true;
-                }
-                else if ((posX - 1200) * (posX - 1200) + (posY - 400) * (posY - 400) > 400 * 400 && posX > 1200) {
-                    return true;
-                }
-                else if (posY < 2 || posY > 798) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-            function lap_counter(x, y) {
-                var posX = x;
-                var posY = y;
-                if (posX >= 850 && posX <= 900 && posY >= 600 && posY <= 800) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-            function player(index, key, key2, x, y, c) {
-                this.lapped = false;
-                this.lap = 0;
-                this.id = index;
-                this.color = c;
-                this.counter = 0;
-                this.loaded = false;
-                this.frames = [];
-                this.posX = x;
-                this.posY = y;
-                this.turn_key = key
-                this.boost_key = key2
-                this.alpha = 0;
-                this.speed = 4;
-                this.crash = false;
-                this.hold = false;
-                this.boost = false;
-                this.positions_X = [this.posX];
-                this.positions_Y = [this.posY];
-                this.move = function () {
-                    this.posX = this.posX + this.speed * Math.cos(this.alpha * Math.PI / 180);
-                    this.posY = this.posY + this.speed * Math.sin(this.alpha * Math.PI / 180);
-                }
-                for (let i = 0; i < 8;) {
-                    var img = document.createElement("img");
-                    img.onload = function () {
-                    }
-                    img.src = "img/player_models/centaur_" + this.id + "/centaur" + (i + 1) + ".png";
-                    this.frames.push(img);
-                    i++;
-                }
-                this.loaded = true;
-
-            }
-
-            function race() {
-                if (game) {
-                    var frame = setInterval(function () {
-                        for (var i = 0; i < player_count; i++) {
-                            if (players[i].crash == false) {
-                                if (players[i].counter < 7) {
-                                    players[i].counter++
+                        var winner;
+                        if (victory == false) {
+                            if (players[x].lap >= 20) {
+                                winner = players[x].color;
+                                victory = true;
+                            }
+                            else if ((crashed + 1) >= player_count) {
+                                for (let i = 0; i < player_count; i++) {
+                                    if (players[i].crash == false) {
+                                        winner = players[i].color;
+                                    }
                                 }
-                                else {
-                                    players[i].counter = 0;
-                                }
+                                victory = true;
+                            }
+                        }
+                        if (winner == colors[0]) {
+                            clearInterval(y);
+                            clearInterval(z);
+                            console.log("PLAYER 1 WIN!");
+                            win_div.innerHTML = 
+                            '<h2 style="color: ' + colors[0] + '">Winner, winner, chicken dinner! Player 1<h2>';
+                            root.appendChild(win_div);
+
+                        }
+                        else if (winner == colors[1]) {
+                            clearInterval(y);
+                            clearInterval(z);
+                            console.log("PLAYER 2 WIN!");
+                            win_div.innerHTML = 
+                            '<h2 style="color: ' + colors[1] + '">Winner, winner, chicken dinner! Player 2<h2>';
+                            root.appendChild(win_div);
+                        }
+                        else if (winner == colors[2]) {
+                            clearInterval(y);
+                            clearInterval(z);
+                            console.log("PLAYER 3 WIN!");
+                            win_div.innerHTML = 
+                            '<h2 style="color: ' + colors[2] + '">Winner, winner, chicken dinner! Player 3<h2>';
+                            root.appendChild(win_div);
+                        }
+                        else if (winner == colors[3]) {
+                            clearInterval(y);
+                            clearInterval(z);
+                            console.log("PLAYER 4 WIN!");
+                            win_div.innerHTML = 
+                            '<h2 style="color: ' + colors[3] + '">Winner, winner, chicken dinner! Player 3<h2>';
+                            root.appendChild(win_div);
+                        }
+                    }
+                }
+                function which_keys() {
+                    var choose_keys = document.getElementById("choose_keys")
+                    choose_keys.style.display = "block"
+                    for (var i = 0; i < player_count; i++) {
+                        choose_keys.innerHTML +=
+                            '<label> <h2 style="color: ' + colors[i] + '">Player ' + (i + 1) + '<h2> <h3>Turn key: </h3> <h4> ' + keys[i] + ' </h4> <button onclick="choose_key(this)" class="change" value="' + i + '"> Change </button><h3>Boost key: </h3> <h4> ' + keys2[i] + ' </h4> <button onclick="choose_key2(this)" class="change" value="' + i + '"> Change </button></lavel>'
+                    }
+                    choose_keys.innerHTML += "<div id='ready' onclick='race_ready(this)'>READY!</div>"
+                    document.body.addEventListener("keydown", function (e) {
+                    })
+                }
+                function status_update() {
+                    status.innerHTML = "";
+                    if (player_count == 1) {
+                        var display_player = document.createElement("div");
+                        display_player.className = "stat";
+                        display_player.innerHTML =
+                            "<p style='color: " + colors[0] + ";'> Player 1</p>" +
+                            "<p style='color: white;'>Laps: " + players[0].lap + " / 20 </p>"
+                        if (players[0].crash == false) {
+                            display_player.innerHTML +=
+                                "<p style='color: limegreen;'>PLAYING</p>"
+                        }
+                        else {
+                            display_player.innerHTML +=
+                                "<p style='color: red;'>CRASHED</p>"
+                        }
+                        status.appendChild(display_player)
+                    }
+                    else if (player_count == 2) {
+                        let player_1, player_2;
+                        let display_players = [];
+                        if (players[0].color == "grey") {
+                            player_1 = players[0];
+                            player_2 = players[1];
+                            display_players.push(player_1);
+                            display_players.push(player_2);
+                        }
+                        else {
+                            player_1 = players[1];
+                            player_2 = players[0];
+                            display_players.push(player_1);
+                            display_players.push(player_2);
+                        }
+                        // console.log("PLAYERS[0]: " + players[0].color)
+                        // console.log("PLAYERS[1]: " + players[1].color)
+                        // console.log("Player_1 : " + player_1.color)
+                        // console.log("Player_2 : " + player_2.color)
+                        //console.log(display_players);
+
+                        for (var i = 0; i < 2; i++) {
+                            var display_player = document.createElement("div");
+                            display_player.className = "stat";
+                            display_player.innerHTML =
+                                "<p style='color: " + colors[i] + ";'> Player " + (i + 1) + "</p>" +
+                                "<p style='color: white;'>Laps: " + display_players[i].lap + " / 20 </p>"
+                            if (display_players[i].crash == false) {
+                                display_player.innerHTML +=
+                                    "<p style='color: limegreen;'>PLAYING</p>"
                             }
                             else {
-                                players[i].counter = 4;
+                                display_player.innerHTML +=
+                                    "<p style='color: red;'>CRASHED</p>"
                             }
+                            status.appendChild(display_player)
                         }
-                    }, 80)
-                    var int = setInterval(function () {
+                    }
+                    else if (player_count == 3) {
+                        let player_1, player_2, player_3;
+                        let display_players = [];
+
+                        if (players[0].color == "black") {
+                            player_1 = players[0];
+                        }
+                        else if (players[1].color == "black") {
+                            player_1 = players[1];
+                        }
+                        else if (players[2].color == "black") {
+                            player_1 = players[2];
+                        }
+                        if (players[0].color == "orange") {
+                            player_2 = players[0];
+                        }
+                        else if (players[1].color == "orange") {
+                            player_2 = players[1];
+                        }
+                        else if (players[2].color == "orange") {
+                            player_2 = players[2];
+                        }
+                        if (players[0].color == "pink") {
+                            player_3 = players[0];
+                        }
+                        else if (players[1].color == "pink") {
+                            player_3 = players[1];
+                        }
+                        else if (players[2].color == "pink") {
+                            player_3 = players[2];
+                        }
+                        display_players.push(player_1);
+                        display_players.push(player_2);
+                        display_players.push(player_3);
+
+
+                        for (var i = 0; i < 3; i++) {
+                            var display_player = document.createElement("div");
+                            display_player.className = "stat";
+                            display_player.innerHTML =
+                                "<p style='color: " + colors[i] + ";'> Player " + (i + 1) + "</p>" +
+                                "<p style='color: white;'>Laps: " + display_players[i].lap + " / 20 </p>"
+                            if (display_players[i].crash == false) {
+                                display_player.innerHTML +=
+                                    "<p style='color: limegreen;'>PLAYING</p>"
+                            }
+                            else {
+                                display_player.innerHTML +=
+                                    "<p style='color: red;'>CRASHED</p>"
+                            }
+                            status.appendChild(display_player)
+                        }
+                    }
+                    else if (player_count == 4) {
+                        let player_1, player_2, player_3, player_4;
+                        let display_players = [];
+
+                        if (players[0].color == "grey") {
+                            player_1 = players[0];
+                        }
+                        else if (players[1].color == "grey") {
+                            player_1 = players[1];
+                        }
+                        else if (players[2].color == "grey") {
+                            player_1 = players[2];
+                        }
+                        else if (players[3].color == "grey") {
+                            player_1 = players[3];
+                        }
+
+                        if (players[0].color == "orange") {
+                            player_2 = players[0];
+                        }
+                        else if (players[1].color == "orange") {
+                            player_2 = players[1];
+                        }
+                        else if (players[2].color == "orange") {
+                            player_2 = players[2];
+                        }
+                        else if (players[3].color == "orange") {
+                            player_2 = players[3];
+                        }
+
+                        if (players[0].color == "pink") {
+                            player_3 = players[0];
+                        }
+                        else if (players[1].color == "pink") {
+                            player_3 = players[1];
+                        }
+                        else if (players[2].color == "pink") {
+                            player_3 = players[2];
+                        }
+                        else if (players[3].color == "pink") {
+                            player_3 = players[3];
+                        }
+
+                        if (players[0].color == "white") {
+                            player_4 = players[0];
+                        }
+                        else if (players[1].color == "white") {
+                            player_4 = players[1];
+                        }
+                        else if (players[2].color == "white") {
+                            player_4 = players[2];
+                        }
+                        else if (players[3].color == "white") {
+                            player_4 = players[3];
+                        }
+
+                        display_players.push(player_1);
+                        display_players.push(player_2);
+                        display_players.push(player_3);
+                        display_players.push(player_4);
+
+
+                        for (var i = 0; i < 4; i++) {
+                            var display_player = document.createElement("div");
+                            display_player.className = "stat";
+                            display_player.innerHTML =
+                                "<p style='color: " + colors[i] + ";'> Player " + (i + 1) + "</p>" +
+                                "<p style='color: white;'>Laps: " + display_players[i].lap + " / 20 </p>"
+                            if (display_players[i].crash == false) {
+                                display_player.innerHTML +=
+                                    "<p style='color: limegreen;'>PLAYING</p>"
+                            }
+                            else {
+                                display_player.innerHTML +=
+                                    "<p style='color: red;'>CRASHED</p>"
+                            }
+                            status.appendChild(display_player)
+                        }
+                    }
+
+                }
+                function layout_creation() {
+                    x.beginPath();
+                    var pattern = x.createPattern(img, 'repeat');
+                    x.fillStyle = pattern;
+                    x.fillRect(0, 0, 1600, 800);
+                    //1 zakręt-----------------------------------------------------------------------
+                    x.beginPath();
+                    pattern = x.createPattern(img2, 'repeat');
+                    x.arc(400, 400, 400, 1 / 2 * Math.PI, 3 / 2 * Math.PI, false);
+                    x.fillStyle = pattern;
+                    x.fill();
+                    x.lineWidth = 2;
+                    x.strokeStyle = '#000000';
+                    x.stroke();
+                    //2 zakret------------------------------------------------------------------
+                    x.beginPath();
+                    pattern = x.createPattern(img2, 'repeat');
+                    x.arc(1200, 400, 400, 3 / 2 * Math.PI, 1 / 2 * Math.PI, false);
+                    x.fillStyle = pattern;
+                    x.fill();
+                    x.lineWidth = 2;
+                    x.strokeStyle = '#000000';
+                    x.stroke();
+                    //pole
+                    x.beginPath();
+                    pattern = x.createPattern(img2, 'repeat');
+                    x.fillStyle = pattern;
+                    x.fillRect(400, 0, 800, 800);
+                    //bandy przy polu
+                    x.beginPath();
+                    x.moveTo(400, 0)
+                    x.lineTo(1200, 0)
+                    x.lineWidth = 2;
+                    x.stroke();
+                    x.beginPath();
+                    x.moveTo(400, 800)
+                    x.lineTo(1200, 800)
+                    x.lineWidth = 2;
+                    x.stroke();
+                    //wysepka w srodku
+                    x.beginPath();
+                    pattern = x.createPattern(img, 'repeat');
+                    x.arc(500, 400, 200, 1 / 2 * Math.PI, 3 / 2 * Math.PI, false);
+                    x.fillStyle = pattern;
+                    x.fill();
+                    x.lineWidth = 2;
+                    x.strokeStyle = '#000000';
+                    x.stroke();
+                    pattern = x.createPattern(img, 'repeat');
+                    x.arc(1100, 400, 200, 3 / 2 * Math.PI, 1 / 2 * Math.PI, false);
+                    x.fillStyle = pattern;
+                    x.fill();
+                    x.lineWidth = 2;
+                    x.strokeStyle = '#000000';
+                    x.stroke();
+                    //bandy przy wysepce
+                    x.beginPath();
+                    x.moveTo(500, 600)
+                    x.lineTo(1100, 600)
+                    x.lineWidth = 2;
+                    x.stroke();
+                    //start
+                    x.beginPath();
+                    x.fillStyle = "red";
+                    x.fillRect(850, 601, 10, 198);
+                }
+
+                function how_many_players() {
+                    var how_many = document.getElementsByTagName("button");
+                    for (var i = 0; i < how_many.length; i++) {
+                        how_many[i].onclick = function () {
+                            player_count = this.value;
+                            var remove = document.getElementById("player_count");
+                            remove.style.display = "none"
+                            which_keys();
+                        }
+                    }
+                }
+
+                img2.onload = function () {
+                    console.log("IMG2")
+                }
+                img.onload = function () {
+                        console.log("IMG1")
                         layout_creation();
-                        if (player_count >= 2) {
-                            for (var i = 1; i < player_count; i++) {
-                                if (players[i - 1].posY >= players[i].posY) {
-                                    var tmp = players[i];
-                                    players[i] = players[i - 1]
-                                    players[i - 1] = tmp
-                                }
+                        how_many_players();
+                    }
 
-                            }
+                function check_collisions(x, y) {
+                    var posX = x;
+                    var posY = y;
+                    if ((posX - 500) * (posX - 500) + (posY - 400) * (posY - 400) < 200 * 200) {
+                        return true;
+                    }
+                    else if ((posX - 1100) * (posX - 1100) + (posY - 400) * (posY - 400) < 200 * 200) {
+                        return true;
+                    }
+                    else if (500 < posX && posX < 1100 && 200 < posY && posY < 600) {
+                        return true;
+                    }
+                    else if ((posX - 400) * (posX - 400) + (posY - 400) * (posY - 400) > 400 * 400 && posX < 400) {
+                        return true;
+                    }
+                    else if ((posX - 1200) * (posX - 1200) + (posY - 400) * (posY - 400) > 400 * 400 && posX > 1200) {
+                        return true;
+                    }
+                    else if (posY < 2 || posY > 798) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                function lap_counter(x, y) {
+                    var posX = x;
+                    var posY = y;
+                    if (posX >= 850 && posX <= 900 && posY >= 600 && posY <= 800) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                function player(index, key, key2, x, y, c) {
+                    this.lapped = false;
+                    this.lap = 0;
+                    this.id = index;
+                    this.color = c;
+                    this.counter = 0;
+                    this.loaded = false;
+                    this.frames = [];
+                    this.posX = x;
+                    this.posY = y;
+                    this.turn_key = key
+                    this.boost_key = key2
+                    this.alpha = 0;
+                    this.speed = 4;
+                    this.crash = false;
+                    this.hold = false;
+                    this.boost = false;
+                    this.positions_X = [this.posX];
+                    this.positions_Y = [this.posY];
+                    this.move = function () {
+                        this.posX = this.posX + this.speed * Math.cos(this.alpha * Math.PI / 180);
+                        this.posY = this.posY + this.speed * Math.sin(this.alpha * Math.PI / 180);
+                    }
+                    for (let i = 0; i < 8;) {
+                        var img = document.createElement("img");
+                        img.onload = function () {
                         }
-                        for (var i = 0; i < player_count; i++) {
-                            if (players[i].crash == false) {
-                                if (lap_counter(players[i].posX, players[i].posY)) {
-                                    if (players[i].lapped == false) {
-                                        players[i].lap += 1;
-                                        players[i].lapped = true;
-                                    }
-                                }
-                                else {
-                                    players[i].lapped = false;
-                                }
-                                status.innerHTML = "";
-                                if (players[i].hold) {
-                                    players[i].alpha -= 1;
-                                }
-                                if (players[i].boost) {
-                                    if (players[i].speed <= 8) {
-                                        players[i].speed += 0.1;
-                                    }
-                                }
-                                else {
-                                    if (players[i].speed >= 4) {
-                                        players[i].speed -= 0.1;
-                                    }
-                                }
-                                players[i].move();
-                                players[i].positions_X.push(players[i].posX)
-                                players[i].positions_Y.push(players[i].posY)
+                        img.src = "img/player_models/centaur_" + this.id + "/centaur" + (i + 1) + ".png";
+                        this.frames.push(img);
+                        i++;
+                    }
+                    this.loaded = true;
 
-                                if (check_collisions(players[i].posX, players[i].posY)) {
-                                    players[i].crash = true;
-                                    crashed++;
-                                }
-                                for (var j = 1; j < players[i].positions_Y.length; j++) {
-                                    x.beginPath();
-                                    x.strokeStyle = players[i].color;
-                                    if(players[i].color == colors[0])
-                                        {
-                                            x.strokeStyle = "rgba(0,0,0," + (j / players[i].positions_Y.length) + ")";
-                                        }
-                                    else if(players[i].color == colors[1])
-                                        {
-                                            x.strokeStyle = "rgba(255,165,0," + (j / players[i].positions_Y.length) + ")";
-                                        }
-                                    else if(players[i].color == colors[2])
-                                        {
-                                            x.strokeStyle = "rgba(255,192,203," + (j / players[i].positions_Y.length) + ")";
-                                        }
-                                    else if(players[i].color == colors[3])
-                                        {
-                                            x.strokeStyle = "rgba(255,255,255," + (j / players[i].positions_Y.length) + ")";
-                                        }
-                                    x.moveTo(players[i].positions_X[j - 1], players[i].positions_Y[j - 1])
-                                    x.lineTo(players[i].positions_X[j], players[i].positions_Y[j])
-                                    x.stroke();
-                                }
-                                x.save(); // save current state
-                                x.translate(players[i].posX, players[i].posY)
-                                if (players[i].posY <= 400) {
-                                    x.scale(-1, 1);
-                                    x.rotate(Math.cos(90 * Math.PI / 180 - players[i].alpha * Math.PI / 180)); // rotate
-                                    x.drawImage(players[i].frames[players[i].counter], -50, -85); // draws a chain link or dagger
+                }
+
+                function race() {
+                    if (game) {
+                        var frame = setInterval(function () {
+                            for (var i = 0; i < player_count; i++) {
+                                if (players[i].crash == false) {
+                                    if (players[i].counter < 7) {
+                                        players[i].counter++
+                                    }
+                                    else {
+                                        players[i].counter = 0;
+                                    }
                                 }
                                 else {
-                                    x.rotate(Math.cos(90 * Math.PI / 180 - players[i].alpha * Math.PI / 180)); // rotate
-                                    x.drawImage(players[i].frames[players[i].counter], -50, -85); // draws a chain link or dagger
+                                    players[i].counter = 4;
                                 }
-                                x.restore(); // restore original states (no rotation etc)
+                            }
+                        }, 80)
+                        var int = setInterval(function () {
+                            layout_creation();
+                            if (player_count >= 2) {
+                                for (var i = 1; i < player_count; i++) {
+                                    if (players[i - 1].posY >= players[i].posY) {
+                                        var tmp = players[i];
+                                        players[i] = players[i - 1]
+                                        players[i - 1] = tmp
+                                    }
 
-                                if (players[i].positions_X.length >= 50) {
+                                }
+                            }
+                            for (var i = 0; i < player_count; i++) {
+                                if (players[i].crash == false) {
+                                    if (lap_counter(players[i].posX, players[i].posY)) {
+                                        if (players[i].lapped == false) {
+                                            players[i].lap += 1;
+                                            players[i].lapped = true;
+                                        }
+                                    }
+                                    else {
+                                        players[i].lapped = false;
+                                    }
+                                    status.innerHTML = "";
+                                    if (players[i].hold) {
+                                        players[i].alpha -= 1;
+                                    }
+                                    if (players[i].boost) {
+                                        if (players[i].speed <= 8) {
+                                            players[i].speed += 0.1;
+                                        }
+                                    }
+                                    else {
+                                        if (players[i].speed >= 4) {
+                                            players[i].speed -= 0.1;
+                                        }
+                                    }
+                                    players[i].move();
+                                    players[i].positions_X.push(players[i].posX)
+                                    players[i].positions_Y.push(players[i].posY)
+
+                                    if (check_collisions(players[i].posX, players[i].posY)) {
+                                        players[i].crash = true;
+                                        crashed++;
+                                    }
+                                    for (var j = 1; j < players[i].positions_Y.length; j++) {
+                                        x.beginPath();
+                                        x.strokeStyle = players[i].color;
+                                        if(players[i].color == colors[0])
+                                            {
+                                                x.strokeStyle = "rgba(0,0,0," + (j / players[i].positions_Y.length) + ")";
+                                            }
+                                        else if(players[i].color == colors[1])
+                                            {
+                                                x.strokeStyle = "rgba(255,165,0," + (j / players[i].positions_Y.length) + ")";
+                                            }
+                                        else if(players[i].color == colors[2])
+                                            {
+                                                x.strokeStyle = "rgba(255,192,203," + (j / players[i].positions_Y.length) + ")";
+                                            }
+                                        else if(players[i].color == colors[3])
+                                            {
+                                                x.strokeStyle = "rgba(255,255,255," + (j / players[i].positions_Y.length) + ")";
+                                            }
+                                        x.moveTo(players[i].positions_X[j - 1], players[i].positions_Y[j - 1])
+                                        x.lineTo(players[i].positions_X[j], players[i].positions_Y[j])
+                                        x.stroke();
+                                    }
+                                    x.save(); // save current state
+                                    x.translate(players[i].posX, players[i].posY)
+                                    if (players[i].posY <= 400) {
+                                        x.scale(-1, 1);
+                                        x.rotate(Math.cos(90 * Math.PI / 180 - players[i].alpha * Math.PI / 180)); // rotate
+                                        x.drawImage(players[i].frames[players[i].counter], -50, -85); // draws a chain link or dagger
+                                    }
+                                    else {
+                                        x.rotate(Math.cos(90 * Math.PI / 180 - players[i].alpha * Math.PI / 180)); // rotate
+                                        x.drawImage(players[i].frames[players[i].counter], -50, -85); // draws a chain link or dagger
+                                    }
+                                    x.restore(); // restore original states (no rotation etc)
+
+                                    if (players[i].positions_X.length >= 50) {
+                                        players[i].positions_X.splice(0, 1);
+                                        players[i].positions_Y.splice(0, 1);
+                                    }
+
+
+                                }
+                                else {
+                                    for (var j = 1; j < players[i].positions_Y.length; j++) {
+                                        x.beginPath();
+                                        if(players[i].color == colors[0])
+                                            {
+                                                x.strokeStyle = "rgba(0,0,0," + (j / players[i].positions_Y.length) + ")";
+                                            }
+                                        else if(players[i].color == colors[1])
+                                            {
+                                                x.strokeStyle = "rgba(255,165,0," + (j / players[i].positions_Y.length) + ")";
+                                            }
+                                        else if(players[i].color == colors[2])
+                                            {
+                                                x.strokeStyle = "rgba(255,192,203," + (j / players[i].positions_Y.length) + ")";
+                                            }
+                                        else if(players[i].color == colors[3])
+                                            {
+                                                x.strokeStyle = "rgba(255,255,255," + (j / players[i].positions_Y.length) + ")";
+                                            }
+                                        x.moveTo(players[i].positions_X[j - 1], players[i].positions_Y[j - 1])
+                                        x.lineTo(players[i].positions_X[j], players[i].positions_Y[j])
+                                        x.stroke();
+                                    }
+                                    x.save(); // save current state
+                                    x.translate(players[i].posX, players[i].posY)
+                                    if (players[i].posY <= 400) {
+                                        x.scale(-1, 1);
+                                        x.rotate(Math.cos(90 * Math.PI / 180 - players[i].alpha * Math.PI / 180)); // rotate
+                                        x.drawImage(players[i].frames[players[i].counter], -50, -85); // draws a chain link or dagger
+                                    }
+                                    else {
+                                        x.rotate(Math.cos(90 * Math.PI / 180 - players[i].alpha * Math.PI / 180)); // rotate
+                                        x.drawImage(players[i].frames[players[i].counter], -50, -85); // draws a chain link or dagger
+                                    }
+                                    x.restore(); // restore original states (no rotation etc)
                                     players[i].positions_X.splice(0, 1);
                                     players[i].positions_Y.splice(0, 1);
                                 }
-
-
+                                end_race(i, frame, int);
                             }
-                            else {
-                                for (var j = 1; j < players[i].positions_Y.length; j++) {
-                                    x.beginPath();
-                                    if(players[i].color == colors[0])
-                                        {
-                                            x.strokeStyle = "rgba(0,0,0," + (j / players[i].positions_Y.length) + ")";
-                                        }
-                                    else if(players[i].color == colors[1])
-                                        {
-                                            x.strokeStyle = "rgba(255,165,0," + (j / players[i].positions_Y.length) + ")";
-                                        }
-                                    else if(players[i].color == colors[2])
-                                        {
-                                            x.strokeStyle = "rgba(255,192,203," + (j / players[i].positions_Y.length) + ")";
-                                        }
-                                    else if(players[i].color == colors[3])
-                                        {
-                                            x.strokeStyle = "rgba(255,255,255," + (j / players[i].positions_Y.length) + ")";
-                                        }
-                                    x.moveTo(players[i].positions_X[j - 1], players[i].positions_Y[j - 1])
-                                    x.lineTo(players[i].positions_X[j], players[i].positions_Y[j])
-                                    x.stroke();
-                                }
-                                x.save(); // save current state
-                                x.translate(players[i].posX, players[i].posY)
-                                if (players[i].posY <= 400) {
-                                    x.scale(-1, 1);
-                                    x.rotate(Math.cos(90 * Math.PI / 180 - players[i].alpha * Math.PI / 180)); // rotate
-                                    x.drawImage(players[i].frames[players[i].counter], -50, -85); // draws a chain link or dagger
-                                }
-                                else {
-                                    x.rotate(Math.cos(90 * Math.PI / 180 - players[i].alpha * Math.PI / 180)); // rotate
-                                    x.drawImage(players[i].frames[players[i].counter], -50, -85); // draws a chain link or dagger
-                                }
-                                x.restore(); // restore original states (no rotation etc)
-                                players[i].positions_X.splice(0, 1);
-                                players[i].positions_Y.splice(0, 1);
-                            }
-                            end_race(i, frame, int);
-                        }
-                        status_update();
-                    }, 20)
+                            status_update();
+                        }, 20)
+                    }
+
                 }
 
+                document.body.addEventListener("keydown", function (e) {
+                    if (game) {
+                        if (player_count == 1) {
+                            if (e.key == players[0].turn_key) {
+                                players[0].hold = true;
+                            }
+                            else if (e.key == players[0].boost_key) {
+                                players[0].boost = true;
+                            }
+                        }
+                        else if (player_count == 2) {
+                            if (e.key == players[0].turn_key) {
+                                players[0].hold = true;
+                            }
+                            else if (e.key == players[0].boost_key) {
+                                players[0].boost = true;
+                            }
+                            else if (e.key == players[1].turn_key) {
+                                players[1].hold = true;
+                            }
+                            else if (e.key == players[1].boost_key) {
+                                players[1].boost = true;
+                            }
+                        }
+                        else if (player_count == 3) {
+                            if (e.key == players[0].turn_key) {
+                                players[0].hold = true;
+                            }
+                            else if (e.key == players[0].boost_key) {
+                                players[0].boost = true;
+                            }
+                            else if (e.key == players[1].turn_key) {
+                                players[1].hold = true;
+                            }
+                            else if (e.key == players[1].boost_key) {
+                                players[1].boost = true;
+                            }
+                            else if (e.key == players[2].turn_key) {
+                                players[2].hold = true;
+                            }
+                            else if (e.key == players[2].boost_key) {
+                                players[2].boost = true;
+                            }
+                        }
+                        else if (player_count == 4) {
+                            if (e.key == players[0].turn_key) {
+                                players[0].hold = true;
+                            }
+                            else if (e.key == players[0].boost_key) {
+                                players[0].boost = true;
+                            }
+                            else if (e.key == players[1].turn_key) {
+                                players[1].hold = true;
+                            }
+                            else if (e.key == players[1].boost_key) {
+                                players[1].boost = true;
+                            }
+                            else if (e.key == players[2].turn_key) {
+                                players[2].hold = true;
+                            }
+                            else if (e.key == players[2].boost_key) {
+                                players[2].boost = true;
+                            }
+                            else if (e.key == players[3].turn_key) {
+                                players[3].hold = true;
+                            }
+                            else if (e.key == players[3].boost_key) {
+                                players[3].boost = true;
+                            }
+                        }
+                    }
+                })
+                document.body.addEventListener("keyup", function (e) {
+                    if (game) {
+                        if (player_count == 1) {
+                            if (e.key == players[0].turn_key) {
+                                players[0].hold = false;
+                            }
+                            else if (e.key == players[0].boost_key) {
+                                players[0].boost = false;;
+                            }
+                        }
+                        else if (player_count == 2) {
+                            if (e.key == players[0].turn_key) {
+                                players[0].hold = false;
+                            }
+                            else if (e.key == players[0].boost_key) {
+                                players[0].boost = false;;
+                            }
+                            else if (e.key == players[1].turn_key) {
+                                players[1].hold = false;
+                            }
+                            else if (e.key == players[1].boost_key) {
+                                players[1].boost = false;;
+                            }
+                        }
+                        else if (player_count == 3) {
+                            if (e.key == players[0].turn_key) {
+                                players[0].hold = false;
+                            }
+                            else if (e.key == players[0].boost_key) {
+                                players[0].boost = false;;
+                            }
+                            else if (e.key == players[1].turn_key) {
+                                players[1].hold = false;
+                            }
+                            else if (e.key == players[1].boost_key) {
+                                players[1].boost = false;;
+                            }
+                            else if (e.key == players[2].turn_key) {
+                                players[2].hold = false;
+                            }
+                            else if (e.key == players[2].boost_key) {
+                                players[2].boost = false;;
+                            }
+                        }
+                        else if (player_count == 4) {
+                            if (e.key == players[0].turn_key) {
+                                players[0].hold = false;
+                            }
+                            else if (e.key == players[0].boost_key) {
+                                players[0].boost = false;;
+                            }
+                            else if (e.key == players[1].turn_key) {
+                                players[1].hold = false;
+                            }
+                            else if (e.key == players[1].boost_key) {
+                                players[1].boost = false;;
+                            }
+                            else if (e.key == players[2].turn_key) {
+                                players[2].hold = false;
+                            }
+                            else if (e.key == players[2].boost_key) {
+                                players[2].boost = false;;
+                            }
+                            else if (e.key == players[3].turn_key) {
+                                players[3].hold = false;
+                            }
+                            else if (e.key == players[3].boost_key) {
+                                players[3].boost = false;;
+                            }
+                        }
+                    }
+                })
+
+                window.addEventListener("keydown", function (e) {
+                    // blokowanie przypadkowego scrollowania strony
+                    if ([32, 33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+                        e.preventDefault();
+                    }
+                }, false);
+            })
+        </script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                font-family: "Comic Sans MS", cursive, sans-serif;
             }
 
-            document.body.addEventListener("keydown", function (e) {
-                if (game) {
-                    if (player_count == 1) {
-                        if (e.key == players[0].turn_key) {
-                            players[0].hold = true;
-                        }
-                        else if (e.key == players[0].boost_key) {
-                            players[0].boost = true;
-                        }
-                    }
-                    else if (player_count == 2) {
-                        if (e.key == players[0].turn_key) {
-                            players[0].hold = true;
-                        }
-                        else if (e.key == players[0].boost_key) {
-                            players[0].boost = true;
-                        }
-                        else if (e.key == players[1].turn_key) {
-                            players[1].hold = true;
-                        }
-                        else if (e.key == players[1].boost_key) {
-                            players[1].boost = true;
-                        }
-                    }
-                    else if (player_count == 3) {
-                        if (e.key == players[0].turn_key) {
-                            players[0].hold = true;
-                        }
-                        else if (e.key == players[0].boost_key) {
-                            players[0].boost = true;
-                        }
-                        else if (e.key == players[1].turn_key) {
-                            players[1].hold = true;
-                        }
-                        else if (e.key == players[1].boost_key) {
-                            players[1].boost = true;
-                        }
-                        else if (e.key == players[2].turn_key) {
-                            players[2].hold = true;
-                        }
-                        else if (e.key == players[2].boost_key) {
-                            players[2].boost = true;
-                        }
-                    }
-                    else if (player_count == 4) {
-                        if (e.key == players[0].turn_key) {
-                            players[0].hold = true;
-                        }
-                        else if (e.key == players[0].boost_key) {
-                            players[0].boost = true;
-                        }
-                        else if (e.key == players[1].turn_key) {
-                            players[1].hold = true;
-                        }
-                        else if (e.key == players[1].boost_key) {
-                            players[1].boost = true;
-                        }
-                        else if (e.key == players[2].turn_key) {
-                            players[2].hold = true;
-                        }
-                        else if (e.key == players[2].boost_key) {
-                            players[2].boost = true;
-                        }
-                        else if (e.key == players[3].turn_key) {
-                            players[3].hold = true;
-                        }
-                        else if (e.key == players[3].boost_key) {
-                            players[3].boost = true;
-                        }
-                    }
-                }
-            })
-            document.body.addEventListener("keyup", function (e) {
-                if (game) {
-                    if (player_count == 1) {
-                        if (e.key == players[0].turn_key) {
-                            players[0].hold = false;
-                        }
-                        else if (e.key == players[0].boost_key) {
-                            players[0].boost = false;;
-                        }
-                    }
-                    else if (player_count == 2) {
-                        if (e.key == players[0].turn_key) {
-                            players[0].hold = false;
-                        }
-                        else if (e.key == players[0].boost_key) {
-                            players[0].boost = false;;
-                        }
-                        else if (e.key == players[1].turn_key) {
-                            players[1].hold = false;
-                        }
-                        else if (e.key == players[1].boost_key) {
-                            players[1].boost = false;;
-                        }
-                    }
-                    else if (player_count == 3) {
-                        if (e.key == players[0].turn_key) {
-                            players[0].hold = false;
-                        }
-                        else if (e.key == players[0].boost_key) {
-                            players[0].boost = false;;
-                        }
-                        else if (e.key == players[1].turn_key) {
-                            players[1].hold = false;
-                        }
-                        else if (e.key == players[1].boost_key) {
-                            players[1].boost = false;;
-                        }
-                        else if (e.key == players[2].turn_key) {
-                            players[2].hold = false;
-                        }
-                        else if (e.key == players[2].boost_key) {
-                            players[2].boost = false;;
-                        }
-                    }
-                    else if (player_count == 4) {
-                        if (e.key == players[0].turn_key) {
-                            players[0].hold = false;
-                        }
-                        else if (e.key == players[0].boost_key) {
-                            players[0].boost = false;;
-                        }
-                        else if (e.key == players[1].turn_key) {
-                            players[1].hold = false;
-                        }
-                        else if (e.key == players[1].boost_key) {
-                            players[1].boost = false;;
-                        }
-                        else if (e.key == players[2].turn_key) {
-                            players[2].hold = false;
-                        }
-                        else if (e.key == players[2].boost_key) {
-                            players[2].boost = false;;
-                        }
-                        else if (e.key == players[3].turn_key) {
-                            players[3].hold = false;
-                        }
-                        else if (e.key == players[3].boost_key) {
-                            players[3].boost = false;;
-                        }
-                    }
-                }
-            })
+            html,
+            body {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background-color: black;
+            }
 
-            window.addEventListener("keydown", function (e) {
-                // blokowanie przypadkowego scrollowania strony
-                if ([32, 33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
-                    e.preventDefault();
-                }
-            }, false);
-        })
-    </script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            font-family: "Comic Sans MS", cursive, sans-serif;
-        }
+            #root {
+                height: 100%;
+                overflow: hidden;
+                position: relative;
+            }
 
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: black;
-        }
+            canvas {
+                padding-left: 0;
+                padding-right: 0;
+                margin-left: auto;
+                margin-right: auto;
+                display: block;
+                margin-top: 250px;
+            }
 
-        #root {
-            height: 100%;
-            overflow: hidden;
-            position: relative;
-        }
+            #overlay {
+                height: 100%;
+                /* changed for demo */
+                width: 100%;
+                position: fixed;
+                z-index: 3;
+                top: 0;
+                left: 0;
+                background-color: rgba(0, 0, 0, .3);
+                overflow-y: hidden;
+                transition: 1s;
+            }
 
-        canvas {
-            padding-left: 0;
-            padding-right: 0;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-            margin-top: 250px;
-        }
+            #player_count {
+                margin: 0 auto;
+                margin-top: 250px;
+                width: 400px;
+                height: 300px;
+                border: 3px solid greenyellow;
+                background-color: green;
+                opacity: 0.9;
+                border-radius: 20px;
+                color: white;
+                text-align: center;
+                transition: 1s;
+            }
 
-        #overlay {
-            height: 100%;
-            /* changed for demo */
-            width: 100%;
-            position: fixed;
-            z-index: 3;
-            top: 0;
-            left: 0;
-            background-color: rgba(0, 0, 0, .3);
-            overflow-y: hidden;
-            transition: 1s;
-        }
+            button {
+                display: block;
+                border: 3px solid greenyellow;
+                background-color: green;
+                color: white;
+                font-size: 2em;
+                width: 350;
+                margin-left: 25px;
+                margin-top: 10px;
+                border-radius: 10px;
+            }
 
-        #player_count {
-            margin: 0 auto;
-            margin-top: 250px;
-            width: 400px;
-            height: 300px;
-            border: 3px solid greenyellow;
-            background-color: green;
-            opacity: 0.9;
-            border-radius: 20px;
-            color: white;
-            text-align: center;
-            transition: 1s;
-        }
+            #choose_keys {
+                display: none;
+                margin: 0 auto;
+                margin-top: 300px;
+                width: 1000px;
+                height: 400px;
+                border: 3px solid greenyellow;
+                background-color: green;
+                opacity: 0.9;
+                border-radius: 20px;
+                color: white;
+                text-align: center;
+            }
 
-        button {
-            display: block;
-            border: 3px solid greenyellow;
-            background-color: green;
-            color: white;
-            font-size: 2em;
-            width: 350;
-            margin-left: 25px;
-            margin-top: 10px;
-            border-radius: 10px;
-        }
+            label {
+                display: inline-block;
+                margin: 20px;
+                margin-bottom: 40px;
+                margin-top: 40px;
+                width: 200px;
+            }
 
-        #choose_keys {
-            display: none;
-            margin: 0 auto;
-            margin-top: 300px;
-            width: 1000px;
-            height: 400px;
-            border: 3px solid greenyellow;
-            background-color: green;
-            opacity: 0.9;
-            border-radius: 20px;
-            color: white;
-            text-align: center;
-        }
+            .change {
+                margin: 0 auto;
+                margin-top: 20px;
+                width: 80px;
+                font-size: 1.2em;
+            }
 
-        label {
-            display: inline-block;
-            margin: 20px;
-            margin-bottom: 40px;
-            margin-top: 40px;
-            width: 200px;
-        }
+            #ready {
+                font-size: 2em;
+            }
 
-        .change {
-            margin: 0 auto;
-            margin-top: 20px;
-            width: 80px;
-            font-size: 1.2em;
-        }
+            #ready:hover {
+                font-size: 2em;
+                color: aqua;
+            }
 
-        #ready {
-            font-size: 2em;
-        }
+            .overlay2 {
+                height: 100%;
+                /* changed for demo */
+                width: 100%;
+                position: fixed;
+                z-index: 3;
+                top: 0;
+                left: 0;
+                background-color: green;
+                opacity: 0.9;
+                color: white;
+                text-align: center;
+                overflow-y: hidden;
+            }
 
-        #ready:hover {
-            font-size: 2em;
-            color: aqua;
-        }
+            .inform {
+                font-size: 3em;
+                margin-top: 400px;
+            }
 
-        .overlay2 {
-            height: 100%;
-            /* changed for demo */
-            width: 100%;
-            position: fixed;
-            z-index: 3;
-            top: 0;
-            left: 0;
-            background-color: green;
-            opacity: 0.9;
-            color: white;
-            text-align: center;
-            overflow-y: hidden;
-        }
+            #grass {
+                position: absolute;
+                left: -100000px;
+            }
 
-        .inform {
-            font-size: 3em;
-            margin-top: 400px;
-        }
+            #dirt {
+                position: absolute;
+                left: -100000px;
+            }
 
-        #grass {
-            position: absolute;
-            left: -100000px;
-        }
+            #status_div {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 230px;
+                width: 100%;
+                border: 3px inset white;
+                color: white;
+                background-color: darkslategrey;
+            }
 
-        #dirt {
-            position: absolute;
-            left: -100000px;
-        }
+            .s_cell {
+                color: white;
+                font-size: 2em;
+                width: 20%;
+                display: inline-block;
+            }
 
-        #status_div {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 230px;
-            width: 100%;
-            border: 3px inset white;
-            color: white;
-            background-color: darkslategrey;
-        }
+            .stat {
+                font-size: 3em;
+                display: inline-block;
+                width: 25%;
+            }
+            .win_div{
+                position: fixed;
+                top: 300px;
+                left: 450px;
+                width: 1000px;
+                height: 400px;
+                border: 3px solid greenyellow;
+                background-color: green;
+                opacity: 0.9;
+                border-radius: 20px;
+                color: white;
+                text-align: center;
+                z-index: 20;
+                padding-top:250px;
+                font-size: 3em;
+            }
+        </style>
+    </head>
 
-        .s_cell {
-            color: white;
-            font-size: 2em;
-            width: 20%;
-            display: inline-block;
-        }
+    <body>
+        <div id="root">
+            <div id="overlay">
+                <div id="player_count">
+                    <h1>Wybierz ilość graczy: </h1>
+                    <button value="1">1</button>
+                    <button value="2">2</button>
+                    <button value="3">3</button>
+                    <button value="4">4</button>
+                </div>
+                <div id="choose_keys">
+                    <h1>Wybierz przyciski dla graczy: </h1>
 
-        .stat {
-            font-size: 3em;
-            display: inline-block;
-            width: 25%;
-        }
-        .win_div{
-            position: fixed;
-            top: 300px;
-            left: 450px;
-            width: 1000px;
-            height: 400px;
-            border: 3px solid greenyellow;
-            background-color: green;
-            opacity: 0.9;
-            border-radius: 20px;
-            color: white;
-            text-align: center;
-            z-index: 20;
-            padding-top:250px;
-            font-size: 3em;
-        }
-    </style>
-</head>
-
-<body>
-    <div id="root">
-        <div id="overlay">
-            <div id="player_count">
-                <h1>Wybierz ilość graczy: </h1>
-                <button value="1">1</button>
-                <button value="2">2</button>
-                <button value="3">3</button>
-                <button value="4">4</button>
+                </div>
             </div>
-            <div id="choose_keys">
-                <h1>Wybierz przyciski dla graczy: </h1>
-
+            <div id="status_div">
             </div>
+            <canvas id="canvas" width="1600" height="800" style="border: 1px solid black"></canvas>
         </div>
-        <div id="status_div">
-        </div>
-        <canvas id="canvas" width="1600" height="800" style="border: 1px solid black"></canvas>
-    </div>
-</body>
+    </body>
